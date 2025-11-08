@@ -51,6 +51,7 @@ const Marketplace = () => {
 
   const fetchMarketplaceItems = async () => {
     try {
+      // @ts-ignore - Table will exist after running marketplace_tables.sql
       const { data, error } = await supabase
         .from('marketplace_items')
         .select('*')
@@ -58,7 +59,7 @@ const Marketplace = () => {
         .order('downloads', { ascending: false });
 
       if (error) throw error;
-      setItems((data as any) || []);
+      setItems((data as unknown as MarketplaceItem[]) || []);
     } catch (error) {
       console.error('Error fetching marketplace items:', error);
       toast.error("Failed to load marketplace items");
@@ -72,14 +73,15 @@ const Marketplace = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const { data, error } = await supabase
+      // @ts-ignore - Table will exist after running marketplace_tables.sql
+      const { data, error } = await (supabase as any)
         .from('user_credits')
         .select('balance')
         .eq('user_id', user.id)
         .single();
 
       if (error) throw error;
-      setUserCredits((data as any)?.balance || 0);
+      setUserCredits((data as unknown as { balance: number })?.balance || 0);
     } catch (error) {
       console.error('Error fetching credits:', error);
     }
@@ -151,6 +153,7 @@ const Marketplace = () => {
       fetchUserCredits();
       
       // Update downloads count
+      // @ts-ignore - Table will exist after running marketplace_tables.sql
       await supabase
         .from('marketplace_items')
         .update({ downloads: item.downloads + 1 })
