@@ -1,5 +1,10 @@
+-- Drop existing tables if they exist (to avoid conflicts)
+DROP TABLE IF EXISTS public.marketplace_transactions CASCADE;
+DROP TABLE IF EXISTS public.marketplace_items CASCADE;
+DROP TABLE IF EXISTS public.user_credits CASCADE;
+
 -- Create user_credits table
-CREATE TABLE IF NOT EXISTS public.user_credits (
+CREATE TABLE public.user_credits (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   balance INTEGER NOT NULL DEFAULT 0,
@@ -22,7 +27,7 @@ CREATE POLICY "Users can update their own credits"
   USING (auth.uid() = user_id);
 
 -- Create marketplace_items table
-CREATE TABLE IF NOT EXISTS public.marketplace_items (
+CREATE TABLE public.marketplace_items (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   mutation_id UUID REFERENCES public.mutations(id) ON DELETE CASCADE,
   seller_id UUID NOT NULL,
@@ -55,7 +60,7 @@ CREATE POLICY "Sellers can manage their items"
   USING (auth.uid() = seller_id);
 
 -- Create marketplace_transactions table
-CREATE TABLE IF NOT EXISTS public.marketplace_transactions (
+CREATE TABLE public.marketplace_transactions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   item_id UUID NOT NULL REFERENCES public.marketplace_items(id) ON DELETE CASCADE,
   buyer_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,

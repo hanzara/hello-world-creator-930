@@ -13,13 +13,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface MarketplaceItem {
   id: string;
-  mutation_id: string;
+  mutation_id: string | null;
   title: string;
   description: string;
   mutation_type: string;
   price_credits: number;
-  performance_gain: number;
-  cost_reduction: number;
+  performance_gain: number | null;
+  cost_reduction: number | null;
   benchmark_data: any;
   seller_id: string;
   downloads: number;
@@ -58,7 +58,7 @@ const Marketplace = () => {
         .order('downloads', { ascending: false });
 
       if (error) throw error;
-      setItems(data || []);
+      setItems((data as any) || []);
     } catch (error) {
       console.error('Error fetching marketplace items:', error);
       toast.error("Failed to load marketplace items");
@@ -79,7 +79,7 @@ const Marketplace = () => {
         .single();
 
       if (error) throw error;
-      setUserCredits(data?.balance || 0);
+      setUserCredits((data as any)?.balance || 0);
     } catch (error) {
       console.error('Error fetching credits:', error);
     }
@@ -257,16 +257,22 @@ const Marketplace = () => {
                   </div>
 
                   {/* Metrics */}
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="flex items-center gap-2 text-sm">
-                      <TrendingUp className="w-4 h-4 text-green-500" />
-                      <span className="text-muted-foreground">+{item.performance_gain}%</span>
+                   {(item.performance_gain || item.cost_reduction) && (
+                    <div className="grid grid-cols-2 gap-2">
+                      {item.performance_gain && (
+                        <div className="flex items-center gap-2 text-sm">
+                          <TrendingUp className="w-4 h-4 text-green-500" />
+                          <span className="text-muted-foreground">+{item.performance_gain}%</span>
+                        </div>
+                      )}
+                      {item.cost_reduction && (
+                        <div className="flex items-center gap-2 text-sm">
+                          <DollarSign className="w-4 h-4 text-yellow-500" />
+                          <span className="text-muted-foreground">-{item.cost_reduction}%</span>
+                        </div>
+                      )}
                     </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <DollarSign className="w-4 h-4 text-yellow-500" />
-                      <span className="text-muted-foreground">-{item.cost_reduction}%</span>
-                    </div>
-                  </div>
+                  )}
 
                   {/* Downloads */}
                   <p className="text-xs text-muted-foreground">
