@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { CampaignModal, CampaignData } from "@/components/CampaignModal";
 import { MutationPreview } from "@/components/MutationPreview";
+import { MutationToLessonPrompt } from "@/components/MutationToLessonPrompt";
 
 interface Campaign {
   id: string;
@@ -50,6 +51,8 @@ export default function EvolutionEngine() {
   const [mutations, setMutations] = useState<Mutation[]>([]);
   const [campaignModalOpen, setCampaignModalOpen] = useState(false);
   const [isRunningCampaign, setIsRunningCampaign] = useState(false);
+  const [lessonPromptOpen, setLessonPromptOpen] = useState(false);
+  const [selectedMutationForLesson, setSelectedMutationForLesson] = useState<Mutation | null>(null);
 
   useEffect(() => {
     loadRepositories();
@@ -172,6 +175,13 @@ export default function EvolutionEngine() {
 
     toast.success("Mutation approved and applied!");
     loadMutations(selectedRepo!, selectedCampaign || undefined);
+
+    // Show lesson prompt
+    const mutation = mutations.find(m => m.id === mutationId);
+    if (mutation) {
+      setSelectedMutationForLesson(mutation);
+      setLessonPromptOpen(true);
+    }
   };
 
 
@@ -473,6 +483,20 @@ export default function EvolutionEngine() {
               selectedRepo={selectedRepo}
               onCreateCampaign={handleCreateCampaign}
             />
+
+            {/* Mutation to Lesson Prompt */}
+            {selectedMutationForLesson && (
+              <MutationToLessonPrompt
+                mutationId={selectedMutationForLesson.id}
+                mutationType={selectedMutationForLesson.mutation_type}
+                codeOriginal={selectedMutationForLesson.metrics_before?.code || ''}
+                codeMutated={selectedMutationForLesson.metrics_after?.code || ''}
+                language="javascript"
+                explanation={selectedMutationForLesson.explain || selectedMutationForLesson.description}
+                open={lessonPromptOpen}
+                onOpenChange={setLessonPromptOpen}
+              />
+            )}
           </div>
         </main>
       </div>

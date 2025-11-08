@@ -8,7 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
-import { ArrowLeft, Play, CheckCircle2, XCircle, Trophy, Clock, BookOpen, MessageSquare } from 'lucide-react';
+import { ArrowLeft, Play, CheckCircle2, XCircle, Trophy, Clock, BookOpen, MessageSquare, GitCompare } from 'lucide-react';
+import { CodeComparison } from '@/components/CodeComparison';
 
 interface Quiz {
   question: string;
@@ -22,6 +23,8 @@ interface Lesson {
   title: string;
   summary: string;
   code_snippet: string;
+  code_before?: string;
+  code_after?: string;
   language: string;
   concepts: string[];
   youtube_videos: Array<{ title: string; url: string }>;
@@ -233,6 +236,12 @@ export default function LessonView() {
         <Tabs defaultValue="lesson" className="space-y-6">
           <TabsList>
             <TabsTrigger value="lesson">Lesson</TabsTrigger>
+            {lesson.code_before && lesson.code_after && (
+              <TabsTrigger value="comparison">
+                <GitCompare className="mr-2 h-4 w-4" />
+                Code Evolution
+              </TabsTrigger>
+            )}
             <TabsTrigger value="quiz">Quiz</TabsTrigger>
             <TabsTrigger value="community">Community</TabsTrigger>
           </TabsList>
@@ -313,6 +322,17 @@ export default function LessonView() {
               </Card>
             )}
           </TabsContent>
+
+          {lesson.code_before && lesson.code_after && (
+            <TabsContent value="comparison">
+              <CodeComparison
+                codeBefore={lesson.code_before}
+                codeAfter={lesson.code_after}
+                language={lesson.language}
+                explanation={lesson.summary}
+              />
+            </TabsContent>
+          )}
 
           <TabsContent value="quiz">
             {!quizCompleted ? (
